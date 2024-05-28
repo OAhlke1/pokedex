@@ -17,9 +17,11 @@ async function loadPokeImages () {
             data = await fetch(`https://pokeapi.co/api/v2/pokemon/${i}`);
             data = await data.json();
             let card = /* HTML */ `
-                <div class="imgCont displayFlex" onclick="showInOverlay(${i-1})" poketype="${data.types[0].type.name}" style="background-color: ${getBgc(data.types[0].type.name)};">
+                <div class="imgCont displayFlex" onclick="showInOverlay(${i-1})" poketype="${data.types[0].type.name}">
+                    <div class="name displayFlex" style="background-color: ${getBgc(data.types[0].type.name)};">
+                        <p>#${i}: ${data.species.name.charAt(0).toUpperCase() + data.species.name.slice(1)}</p>
+                    </div>
                     <img src="${data.sprites.front_default}" alt="">
-                    <p>#${i}: ${data.species.name.charAt(0).toUpperCase() + data.species.name.slice(1)}</p>
                     <p>Type: ${data.types[0].type.name}</p>
                     <div class="playNoice displayFlex" onclick="startPlayer(event, '${data.cries.latest}')">
                         <p>Noice: </p>
