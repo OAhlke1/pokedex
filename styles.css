@@ -1,0 +1,84 @@
+body {
+    font-family: sans-serif, Arial, Helvetica, sans-serif;
+    margin: 0;
+    background-color: #3c5aa6;
+    padding-top: 10px
+}
+
+p {
+    margin: 0;
+}
+
+.displayFlex {
+    display: flex;
+}
+
+.displayNone {
+    display: none;
+}
+
+.allCards {
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 1.5vw;
+}
+
+.imgCont {
+    flex-direction: column;
+    align-items: center;
+    min-width: 150px;
+    width: 9vw;
+    border-radius: 5px;
+    box-sizing: border-box;
+    cursor: pointer;
+    color: white;
+    padding: 5px;
+}
+
+.imgCont img {
+    width: 100%;
+    height: auto;
+}
+
+.imgCont p {
+    text-align: center;
+    width: fit-content;
+}
+
+.imgCont .playNoice {
+    margin-top: 10px;
+    align-items: center;
+}
+
+.loadingBar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 10px;
+    box-sizing: border-box;
+}
+
+.loadingBar .inner {
+    align-items: center;
+    justify-content: center;
+    width: 0%;
+    height: 100%;
+    background-color: rgb(255, 230, 45);
+}
+
+.overlay {
+    align-items: center;
+    justify-content: center;
+    width: 100vw;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: transparent;
+}
+
+.overlay .imgCont {
+    width: 13.5vw;
+}
