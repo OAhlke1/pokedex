@@ -129,7 +129,7 @@ function getBgc(type) {
             break;
         }
         case "normal": {
-            color = '#000000';
+            color = '#808080';
             break;
         }
     }
