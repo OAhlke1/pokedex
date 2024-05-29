@@ -2,7 +2,7 @@ body {
     font-family: sans-serif, Arial, Helvetica, sans-serif;
     margin: 0;
     background-color: white;
-    padding-top: 10px
+    padding: 10px 0px;
 }
 
 p {
@@ -92,4 +92,25 @@ p {
 
 .overlay .imgCont {
     transform: scale(1.5);
+}
+
+.searchBar {
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 10vh;
+    background-color: red;
+    z-index: 50;
+}
+
+.searchBar input {
+    width: 80%;
+    height: 90%;
+    padding: 10px;
+    border: none;
+    border-radius: 50px;
+    box-sizing: border-box;
 }
