@@ -2,7 +2,7 @@ body {
     font-family: sans-serif, Arial, Helvetica, sans-serif;
     margin: 0;
     background-color: white;
-    padding: 10px 0px;
+    padding: 10px 0px 5vw 0px;
 }
 
 p {
@@ -14,7 +14,7 @@ p {
 }
 
 .displayNone {
-    display: none;
+    display: none !important;
 }
 
 .allCards {
@@ -98,19 +98,38 @@ p {
     align-items: center;
     justify-content: center;
     position: fixed;
-    top: 0;
+    bottom: 0;
     left: 0;
     width: 100vw;
-    height: 10vh;
+    height: 5vh;
     background-color: red;
     z-index: 50;
 }
 
 .searchBar input {
-    width: 80%;
-    height: 90%;
     padding: 10px;
     border: none;
     border-radius: 50px;
     box-sizing: border-box;
+    font-size: 20px;
+}
+
+#searchAttribute {
+    width: 80%;
+    height: 85%;
+}
+
+.fromTo {
+    align-items: center;
+    justify-content: center;
+    width: fit-content;
+    height: 100%;
+    column-gap: 10px;
+}
+
+#from, #to {
+    width: 20%;
+    height: 85%;
+    padding-top: 0;
+    padding-bottom: 0;
 }
