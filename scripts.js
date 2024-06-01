@@ -3,11 +3,11 @@ let loadingBarInner = document.querySelector('.loadingBar .inner');
 let lastIndex = 151;
 let overlayInner;
 let overlay = document.querySelector('.overlay');
-let data;
+let data, data2;
 let allCards = [];
 let pokeInfos = [];
 let keys = [];
-let rotateVal = 0.36;
+let rotateVal = 0.72;
 let scaleFactorX = 1.5;
 let rotateAbleCard;
 
@@ -20,12 +20,16 @@ async function loadPokemon () {
         for(let i=1; i<lastIndex+1; i++) {
             data = await fetch(`https://pokeapi.co/api/v2/pokemon/${i}`);
             data = await data.json();
-            pokeInfos.push({
+            data2 = await fetch(`https://pokeapi.co/api/v2/evolution-chain/${i}`);
+            data2 = await data2.json();
+            pokeInfos.push([{
                 type: data.types[0].type.name,
                 name: data.species.name,
                 image: data.sprites.front_default,
                 noice: data.cries.latest
-            });
+            }, {
+                evolve1: data2.chain.evolves_to[0]
+            }]);
             let card = /* HTML */ `
                 <div class="imgCont displayFlex" onclick="showInOverlay(${i-1})">
                     <div class="name displayFlex" style="background-color: ${getBgc(data.types[0].type.name)};">
@@ -57,12 +61,12 @@ function setCards(start=0) {
     for(let i=start; i<pokeInfos.length; i++) {
         let card = /* HTML */ `
             <div class="imgCont displayFlex" onclick="showInOverlay(${i})">
-                <div class="name displayFlex" style="background-color: ${getBgc(pokeInfos[i].type)};">
-                    <p>#${i+1}: ${pokeInfos[i].name.charAt(0).toUpperCase() + pokeInfos[i].name.slice(1)}</p>
+                <div class="name displayFlex" style="background-color: ${getBgc(pokeInfos[i][0].type)};">
+                    <p>#${i+1}: ${pokeInfos[i][0].name.charAt(0).toUpperCase() + pokeInfos[i][0].name.slice(1)}</p>
                 </div>
-                <img src="${pokeInfos[i].image}" alt="">
-                <p>Type: ${pokeInfos[i].type}</p>
-                <div class="playNoice displayFlex" onclick="startPlayer(event, '${pokeInfos[i].noice}')">
+                <img src="${pokeInfos[i][0].image}" alt="">
+                <p>Type: ${pokeInfos[i][0].type}</p>
+                <div class="playNoice displayFlex" onclick="startPlayer(event, '${pokeInfos[i][0].noice}')">
                     <p>Noice: </p>
                     <svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                         <polygon points="7,5 15,10 7,15" fill="white"/>
@@ -100,14 +104,20 @@ function showInOverlay(i) {
     overlay.classList.remove('displayNone');
     hideAllCards();
     overlay.innerHTML = /* HTML */ `
+    <div class="closeOverlay" onclick="closeOverlay()">
+        <svg width="20px" height="20px" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <line x1="20" y1="20" x2="80" y2="80" stroke="black" stroke-width="20" stroke-linecap="round"/>
+            <line x1="20" y1="80" x2="80" y2="20" stroke="black" stroke-width="20" stroke-linecap="round"/>
+        </svg>
+    </div>
     <div class="imgCont rotateAble displayFlex" onclick="checkRotateVal(event)">
         <div class="front displayFlex">
-            <div class="name displayFlex" style="background-color: ${getBgc(pokeInfos[i].type)};">
-                <p>#${i+1}: ${pokeInfos[i].name.charAt(0).toUpperCase() + pokeInfos[i].name.slice(1)}</p>
+            <div class="name displayFlex" style="background-color: ${getBgc(pokeInfos[i][0].type)};">
+                <p>#${i+1}: ${pokeInfos[i][0].name.charAt(0).toUpperCase() + pokeInfos[i][0].name.slice(1)}</p>
             </div>
-            <img src="${pokeInfos[i].image}" alt="">
-            <p>Type: ${pokeInfos[i].type}</p>
-            <div class="playNoice displayFlex" onclick="startPlayer(event, '${pokeInfos[i].noice}')">
+            <img src="${pokeInfos[i][0].image}" alt="">
+            <p>Type: ${pokeInfos[i][0].type}</p>
+            <div class="playNoice displayFlex" onclick="startPlayer(event, '${pokeInfos[i][0].noice}')">
                 <p>Noice: </p>
                 <svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                     <polygon points="7,5 15,10 7,15" fill="white"/>
@@ -205,7 +215,7 @@ function searchCards(event) {
         setKeywords();
     }
     for(let i=0; i<cards.length; i++) {
-        if(pokeInfos[i].type.includes(val) || pokeInfos[i].name.includes(val)) {
+        if(pokeInfos[i][0].type.includes(val) || pokeInfos[i][0].name.includes(val)) {
             cards[i].classList.remove('displayNone');
         }else {
             cards[i].classList.add('displayNone');
@@ -296,7 +306,7 @@ function updateLocalstorage() {
 
 function checkRotateVal(event) {
     event.stopPropagation();
-    if(+(rotateVal % 180).toFixed(2) === 0.36) {
+    if(+(rotateVal % 180).toFixed(2) === 0.72) {
         rotateCard(event);
     }else {
         return;
@@ -307,7 +317,10 @@ function rotateCard() {
     if(rotateVal % 180 === 90) {
         setDisplayFrontBack();
     }else if(rotateVal % 180 === 0 && rotateVal > 0) {
-        rotateVal+=0.36;
+        if(rotateVal === 360) {
+            rotateVal = 0;
+        }
+        rotateVal+=0.72;
         return;
     }
     rotateVal+=0.36;
