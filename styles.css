@@ -114,7 +114,7 @@ p {
     font-size: 20px;
 }
 
-#searchAttribute {
+#searchAttributes {
     width: 80%;
     height: 85%;
 }
@@ -132,4 +132,21 @@ p {
     height: 85%;
     padding-top: 0;
     padding-bottom: 0;
+}
+
+.rotateAble .front, .rotateAble .back {
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    min-height: 100%;
+    background-color: #383E42;
+    aspect-ratio: 1728 / 2508;
+}
+
+.rotateAble .front {
+    transform: scale(1);
+}
+
+.rotateAble .back {
+    transform: scaleX(-1.5) scaleY(1.5);
 }
