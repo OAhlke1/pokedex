@@ -25,6 +25,7 @@ p {
 }
 
 .imgCont {
+    display: none;
     flex-direction: column;
     align-items: center;
     min-width: 150px;
@@ -37,9 +38,17 @@ p {
     overflow: hidden;
 }
 
+.imgCont.shown {
+    display: flex;
+}
+
 .imgCont img {
     width: 100%;
     height: auto;
+}
+
+.allCards .imgCont .front img:hover {
+    transform: scale(1.25);
 }
 
 .imgCont .name {
@@ -58,7 +67,6 @@ p {
 }
 
 .imgCont .playNoice {
-    margin-top: 10px;
     align-items: center;
 }
 
@@ -88,6 +96,55 @@ p {
     top: 0;
     left: 0;
     background-color: transparent;
+}
+
+.overlay .overlaySlider {
+    align-items: center;
+    justify-content: center;
+}
+
+.overlay .slideCont {
+    align-items: center;
+    justify-content: center;
+    width: 100vw;
+    height: 100vh;
+}
+
+.arrow-prev, .arrow-next {
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 60px;
+    height: 60px;
+    background-color: transparent;
+    border: none;
+    overflow: hidden;
+}
+
+.arrow-prev img, .arrow-next img {
+    width: 200%;
+    height:auto;
+}
+
+.arrow-next img {
+    transform: rotate(180deg);
+}
+
+.arrow-prev {
+    left: 5%;
+}
+
+.arrow-next {
+    right: 5%;
+}
+
+.overlay .closeOverlay {
+    position: absolute;
+    top: 4vw;
+    right: 4vw;
+    cursor: pointer;
 }
 
 .overlay .imgCont {
@@ -134,7 +191,7 @@ p {
     padding-bottom: 0;
 }
 
-.rotateAble .front, .rotateAble .back {
+.front, .back {
     flex-direction: column;
     align-items: center;
     width: 100%;
@@ -143,10 +200,89 @@ p {
     aspect-ratio: 1728 / 2508;
 }
 
+.back {
+    justify-content: space-evenly;
+    box-sizing: border-box;
+}
+
 .rotateAble .front {
     transform: scale(1);
 }
 
 .rotateAble .back {
     transform: scaleX(-1.5) scaleY(1.5);
+}
+
+.evolutions {
+    flex-direction: column;
+    align-items: center;
+}
+
+.separator {
+    width: 80%;
+    height: 2px;
+    background-color: white;
+}
+
+.evos {
+    justify-content: center;
+}
+
+.evo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    row-gap: 10px;
+}
+
+.evo p {
+    width: fit-content;
+    font-size: 12px;
+}
+
+.evo img {
+    width: 50%;
+    height: auto;
+}
+
+.diagramm {
+    justify-content: space-between;
+    width: 100%;
+    height: 50%;
+}
+
+.diagramm div {
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: center;
+    justify-content: flex-start;
+    row-gap: 10px;
+    width: calc(100%/6)
+}
+
+.diagramm div .bar {
+    width: 100%;
+    height: 100%;
+}
+
+.diagramm div .bar .inner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 80%;
+    background-color: gold;
+}
+
+.diagramm div p {
+    font-size: 12px;
+}
+
+.diagramm div .bar .inner p {
+    font-size: 10px;
+    color: #383E42;
+}
+
+.evolvesTo {
+    font-size: 14px;
+    text-align: center;
 }
