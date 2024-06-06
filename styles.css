@@ -148,7 +148,7 @@ p {
 }
 
 .overlay .imgCont {
-    transform: scale(1.5);
+    transform: scale(2);
 }
 
 .searchBar {
@@ -172,7 +172,7 @@ p {
 }
 
 #searchAttributes {
-    width: 80%;
+    width: 50%;
     height: 85%;
 }
 
@@ -210,7 +210,9 @@ p {
 }
 
 .rotateAble .back {
-    transform: scaleX(-1.5) scaleY(1.5);
+    transform: scaleX(-2) scaleY(2);
+    padding: 0px 10px;
+    box-sizing: border-box;
 }
 
 .evolutions {
@@ -246,6 +248,7 @@ p {
 }
 
 .diagramm {
+    flex-direction: column;
     justify-content: space-between;
     width: 100%;
     height: 50%;
@@ -253,33 +256,38 @@ p {
 
 .diagramm div {
     display: flex;
-    flex-direction: column-reverse;
     align-items: center;
     justify-content: flex-start;
-    row-gap: 10px;
-    width: calc(100%/6)
+    column-gap: 10px;
+    width: 100%;
 }
 
 .diagramm div .bar {
-    width: 100%;
-    height: 100%;
+    display: flex;
+    column-gap: 10px;
+    width: 75%;
+    height: 15px;
 }
 
 .diagramm div .bar .inner {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 80%;
+    height: 80% !important;
+    width: 0%;
     background-color: gold;
 }
 
 .diagramm div p {
-    font-size: 12px;
+    width: 40%;
+    font-size: 8px;
+    text-align: right;
 }
 
 .diagramm div .bar .inner p {
     font-size: 10px;
     color: #383E42;
+    width: fit-content;
 }
 
 .evolvesTo {

@@ -51,6 +51,7 @@ async function loadPokemon () {
             //pokeInfo.push(card);
             document.querySelector('.allCards').innerHTML += setCard(i-1);
             loadingBar(i);
+            window.scrollTo(0, document.body.scrollHeight);
         }
     }
     for(let i=1; i<lastIndex+1; i++) {
@@ -170,6 +171,7 @@ function setCards(start=0) {
             </div>
         </div>`;
         document.querySelector('.allCards').innerHTML += card;
+        window.scrollTo(0, document.body.scrollHeight);
     }
 }
 
@@ -189,7 +191,7 @@ function loadingBar (i) {
 
 function loadingBarRemaining(i, diff) {
     loadingBarInner.style.width = `${100*(i+1)/diff}%`;
-    if(i === diff) {
+    if(i === diff-1) {
         document.querySelector('.loadingBar').classList.remove('displayFlex');
         document.querySelector('.loadingBar').classList.add('displayNone');
     }
@@ -262,23 +264,23 @@ function setSlide(i) {
                 <div class="bar"><div class="inner"></div></div>
                 </div>
                 <div class="attack" id="attack${i+1}">
-                    <p>AT</p>
+                    <p>Attack</p>
                     <div class="bar"><div class="inner"></div></div>
                 </div>
                 <div class="defense" id="defense${i+1}">
-                    <p>DF</p>
+                    <p>Defense</p>
                     <div class="bar"><div class="inner"></div></div>
                 </div>
                 <div class="specialAttack" id="specialAttack${i+1}">
-                    <p>SAt</p>
+                    <p>Sp.-Attack</p>
                     <div class="bar"><div class="inner"></div></div>
                 </div>
                 <div class="specialDefense" id="specialDefense${i+1}">
-                    <p>SD</p>
+                    <p>Sp.-Def.</p>
                     <div class="bar"><div class="inner"></div></div>
                 </div>
                 <div class="speed" id="speed${i+1}">
-                    <p>V</p>
+                    <p>Speed</p>
                     <div class="bar"><div class="inner"></div></div>
                 </div>
             </div>
@@ -465,24 +467,23 @@ function fromTo() {
     let from = +document.querySelector('#from').value === 0 ? 1 : +document.querySelector('#from').value;
     let to = +document.querySelector('#to').value === 0 ? lastIndex : +document.querySelector('#to').value;
     showAllPokemon();
-    if(to - from < 0) {
+    if(from > to) {
         return;
     }
-    if(to > lastIndex) {
-        lastIndex = to;
-        loadMissingPokemon(cards.length+1);
+    if(to > from && lastIndex < to) {
+        loadMissingPokemon(lastIndex, to);
     }
     for(let i=0; i<from-1; i++)  {
         cards[i].classList.add('displayNone');
     }
-    for(let j=to; j<lastIndex; j++) {
+    for(let j=to; j<lastIndex-1; j++) {
         cards[j].classList.add('displayNone');
     }
 }
 
-async function loadMissingPokemon(indexFirstNew) {
+async function loadMissingPokemon(indexFirstNew, to) {
     document.querySelector('.loadingBar').classList.remove('displayNone');
-    for(let i=indexFirstNew; i<lastIndex+1; i++) {
+    for(let i=indexFirstNew; i<to; i++) {
         data = await fetch(`https://pokeapi.co/api/v2/pokemon/${i}`);
         data = await data.json();
         pokeInfos.push({
@@ -513,9 +514,10 @@ async function loadMissingPokemon(indexFirstNew) {
             </div>
         `;
         document.querySelector('.allCards').innerHTML += card;
-        loadingBarRemaining(i-indexFirstNew, lastIndex-indexFirstNew);
+        loadingBarRemaining(i-indexFirstNew, to-indexFirstNew);
     }
-    updateLocalstorage();
+    lastIndex = to;
+    //updateLocalstorage();
     setCards(indexFirstNew);
 }
 
@@ -547,7 +549,7 @@ function rotateCard(i) {
     }
     rotateVal+=1.44;
     rotateVal = +rotateVal.toFixed(2);
-    rotateAble = document.querySelectorAll('.overlay .slideCont')[1].querySelector('.imgCont').style.transform = `rotateY(${rotateVal}deg) scale(1.5)`;
+    rotateAble = document.querySelectorAll('.overlay .slideCont')[1].querySelector('.imgCont').style.transform = `rotateY(${rotateVal}deg) scale(2)`;
     setTimeout(()=>{rotateCard(i);}, 2);
 }
 
@@ -576,15 +578,15 @@ function loadHp(i, perce=0) {
         return;
     }
     perce++;
-    document.querySelector(`#hp${i} .bar .inner`).style.height = `${perce/100*pokeInfos[i].hp}%`;
-    document.querySelector(`#hp${i} .bar .inner`).innerHTML = `<p>${perce/100*pokeInfos[i].hp}</p>`;
+    document.querySelector(`#hp${i} .bar .inner`).style.width = `${perce/150*pokeInfos[i].hp}%`;
+    document.querySelector(`#hp${i} .bar .inner`).innerHTML = `<p>${Math.ceil(perce/100*pokeInfos[i].hp)}</p>`;
     if(perce === 100) {
         document.querySelectorAll('.imgCont')[i].classList.add('specsShown');
         return;
     }
     setTimeout(()=>{
         loadHp(i, perce);
-    }, 5)
+    }, 10)
 }
 
 function loadAttack(i, perce=0) {
@@ -593,14 +595,14 @@ function loadAttack(i, perce=0) {
         return;
     }
     perce++;
-    document.querySelector(`#attack${i} .bar .inner`).style.height = `${perce/100*pokeInfos[i].attack}%`;
-    document.querySelector(`#attack${i} .bar .inner`).innerHTML = `<p>${perce/100*pokeInfos[i].attack}</p>`;
+    document.querySelector(`#attack${i} .bar .inner`).style.width = `${perce/150*pokeInfos[i].attack}%`;
+    document.querySelector(`#attack${i} .bar .inner`).innerHTML = `<p>${Math.ceil(perce/100*pokeInfos[i].attack)}</p>`;
     if(perce === 100) {
         return;
     }
     setTimeout(()=>{
         loadAttack(i, perce);
-    }, 5)
+    }, 10)
 }
 
 function loadDefense(i, perce=0) {
@@ -609,14 +611,14 @@ function loadDefense(i, perce=0) {
         return;
     }
     perce++;
-    document.querySelector(`#defense${i} .bar .inner`).style.height = `${perce/100*pokeInfos[i].defense}%`;
-    document.querySelector(`#defense${i} .bar .inner`).innerHTML = `<p>${perce/100*pokeInfos[i].defense}</p>`;
+    document.querySelector(`#defense${i} .bar .inner`).style.width = `${perce/150*pokeInfos[i].defense}%`;
+    document.querySelector(`#defense${i} .bar .inner`).innerHTML = `<p>${Math.ceil(perce/100*pokeInfos[i].defense)}</p>`;
     if(perce === 100) {
         return;
     }
     setTimeout(()=>{
         loadDefense(i, perce);
-    }, 5)
+    }, 10)
 }
 
 function loadSpecialAttack(i, perce=0) {
@@ -625,14 +627,14 @@ function loadSpecialAttack(i, perce=0) {
         return;
     }
     perce++;
-    document.querySelector(`#specialAttack${i} .bar .inner`).style.height = `${perce/100*pokeInfos[i].specialAttack}%`;
-    document.querySelector(`#specialAttack${i} .bar .inner`).innerHTML = `<p>${perce/100*pokeInfos[i].specialAttack}</p>`;
+    document.querySelector(`#specialAttack${i} .bar .inner`).style.width = `${perce/150*pokeInfos[i].specialAttack}%`;
+    document.querySelector(`#specialAttack${i} .bar .inner`).innerHTML = `<p>${Math.ceil(perce/100*pokeInfos[i].specialAttack)}</p>`;
     if(perce === 100) {
         return;
     }
     setTimeout(()=>{
         loadSpecialAttack(i, perce);
-    }, 5)
+    }, 10)
 }
 
 function loadSpecialDefense(i, perce=0) {
@@ -641,14 +643,14 @@ function loadSpecialDefense(i, perce=0) {
         return;
     }
     perce++;
-    document.querySelector(`#specialDefense${i} .bar .inner`).style.height = `${perce/100*pokeInfos[i].specialDefense}%`;
-    document.querySelector(`#specialDefense${i} .bar .inner`).innerHTML = `<p>${perce/100*pokeInfos[i].specialDefense}</p>`;
+    document.querySelector(`#specialDefense${i} .bar .inner`).style.width = `${perce/150*pokeInfos[i].specialDefense}%`;
+    document.querySelector(`#specialDefense${i} .bar .inner`).innerHTML = `<p>${Math.ceil(perce/100*pokeInfos[i].specialDefense)}</p>`;
     if(perce === 100) {
         return;
     }
     setTimeout(()=>{
         loadSpecialDefense(i, perce);
-    }, 5)
+    }, 10)
 }
 
 function loadSpeed(i, perce=0) {
@@ -657,14 +659,14 @@ function loadSpeed(i, perce=0) {
         return;
     }
     perce++;
-    document.querySelector(`#speed${i} .bar .inner`).style.height = `${perce/100*pokeInfos[i].speed}%`;
-    document.querySelector(`#speed${i} .bar .inner`).innerHTML = `<p>${perce/100*pokeInfos[i].speed}</p>`;
+    document.querySelector(`#speed${i} .bar .inner`).style.width = `${perce/150*pokeInfos[i].speed}%`;
+    document.querySelector(`#speed${i} .bar .inner`).innerHTML = `<p>${Math.ceil(perce/100*pokeInfos[i].speed)}</p>`;
     if(perce === 100) {
         return;
     }
     setTimeout(()=>{
         loadSpeed(i, perce);
-    }, 5)
+    }, 10)
 }
 
 function showSpecsImmediately(i) {
