@@ -123,6 +123,14 @@ p {
     overflow: hidden;
 }
 
+.arrow-prev img:hover {
+    transform: scale(1.5);
+}
+
+.arrow-next img:hover {
+    transform: scale(-1.5);
+}
+
 .arrow-prev img, .arrow-next img {
     width: 200%;
     height:auto;
@@ -138,6 +146,12 @@ p {
 
 .arrow-next {
     right: 5%;
+}
+
+@media only screen and (max-width: 500px) {
+    .arrow-prev, .arrow-next {
+        filter: invert(86%) sepia(11%) saturate(4583%) hue-rotate(7deg) brightness(92%) contrast(79%);
+    }
 }
 
 .overlay .closeOverlay {
@@ -185,6 +199,7 @@ p {
 }
 
 #from, #to {
+    min-width: 80px;
     width: 20%;
     height: 85%;
     padding-top: 0;
