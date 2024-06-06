@@ -26,6 +26,7 @@ let cK = function checkKeywords(words, i) {
 }
 
 async function loadPokemon () {
+    console.log(document.querySelectorAll('.overlay').length);
     if(localStorage.pokeData) {
         pokeInfos = JSON.parse(localStorage.pokeData);
         lastIndex = pokeInfos.length;
@@ -683,3 +684,11 @@ function showSpecsImmediately(i) {
     document.querySelector(`#speed${i} .bar .inner`).style.height = `${pokeInfos[i].speed}%`;
     document.querySelector(`#speed${i} .bar .inner`).innerHTML = `<p>${pokeInfos[i].speed}</p>`;    
 }
+
+document.querySelector('body').addEventListener('keyup', (event)=>{
+    event.stopPropagation();
+    console.log(5);
+    if(event.key === 'Escape') {
+        closeOverlay();
+    }
+})
