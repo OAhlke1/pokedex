@@ -18,6 +18,7 @@ let evoChainIndexes = [];
 let evosHtmlArr = [];
 let name = "";
 let slidePerce = 0;
+let loadUpTo = 0;
 
 let cK = function checkKeywords(words, i) {
     let name = pokeInfos[i].name;
@@ -26,7 +27,6 @@ let cK = function checkKeywords(words, i) {
 }
 
 async function loadPokemon () {
-    console.log(document.querySelectorAll('.overlay').length);
     if(localStorage.pokeData) {
         pokeInfos = JSON.parse(localStorage.pokeData);
         lastIndex = pokeInfos.length;
@@ -37,19 +37,7 @@ async function loadPokemon () {
             data = await data.json();
             data2 = await fetch(`https://pokeapi.co/api/v2/evolution-chain/${i}`);
             data2 = await data2.json();
-            pokeInfos.push({
-                type: data.types[0].type.name,
-                name: data.species.name,
-                image: data.sprites.front_default,
-                noice: data.cries.latest,
-                hp: data.stats[0].base_stat,
-                attack: data.stats[1].base_stat,
-                defense: data.stats[2].base_stat,
-                specialAttack: data.stats[3].base_stat,
-                specialDefense: data.stats[4].base_stat,
-                speed: data.stats[5].base_stat
-            });
-            //pokeInfo.push(card);
+            pokeInfosPush(data, i);
             document.querySelector('.allCards').innerHTML += setCard(i-1);
             loadingBar(i);
             window.scrollTo(0, document.body.scrollHeight);
@@ -69,7 +57,7 @@ async function loadEvolutions() {
         evoData = await evoData.json();
         checkForProperty(evoData.chain);
     }
-    pushEvosToPokeInfos();
+    //pushEvosToPokeInfos();
 }
 
 function checkForProperty(elem) {
@@ -84,40 +72,40 @@ function checkForProperty(elem) {
     }
 }
 
-function pushEvosToPokeInfos() {
-    for(let i=0; i<pokeCountArrays.length; i++) {
-        for(let j=0; j<pokeCountArrays[i].length; j++) {
-            if(pokeCountArrays[i][j] === lastIndex+1) {
-                setEvolutions();
-                return;
-            }else {
-                pokeInfos[pokeCountArrays[i][j]-1].evolutions = pokeCountArrays[i];
-            }
-        }
-    }
-    updateLocalstorage();
-}
+// function pushEvosToPokeInfos() {
+//     for(let i=0; i<pokeCountArrays.length; i++) {
+//         for(let j=0; j<pokeCountArrays[i].length; j++) {
+//             if(pokeCountArrays[i][j] === lastIndex+1) {
+//                 setEvolutions();
+//                 return;
+//             }else {
+//                 pokeInfos[pokeCountArrays[i][j]-1].evolutions = pokeCountArrays[i];
+//             }
+//         }
+//     }
+//     updateLocalstorage();
+// }
 
-function setEvolutions() {
-    let evos = "";
-    for(let i=0; i<pokeInfos.length; i++) {
-        if(i === pokeInfos.length-1) {
-            break;
-        }
-        for(let j=0; j<pokeInfos[i].evolutions.length; j++) {
-            evos += /* HTML */ `
-                <div class="evo">
-                    <img src="${pokeInfos[pokeInfos[i].evolutions[j]-1].image}" alt="${pokeInfos[pokeInfos[i].evolutions[j]-1].name}">
-                    <p>${pokeInfos[pokeInfos[i].evolutions[j]-1].name}</p>
-                </div>
-            `;
-        }
-        document.querySelectorAll('.imgCont .back .evolutions')[i].innerHTML = evos;
-        evosHtmlArr.push(evos);
-        evos = "";
-        pokeInfos[i].evolutionsAsHtml = evos;
-    }
-}
+// function setEvolutions() {
+//     let evos = "";
+//     for(let i=0; i<pokeInfos.length; i++) {
+//         if(i === pokeInfos.length-1) {
+//             break;
+//         }
+//         for(let j=0; j<pokeInfos[i].evolutions.length; j++) {
+//             evos += /* HTML */ `
+//                 <div class="evo">
+//                     <img src="${pokeInfos[pokeInfos[i].evolutions[j]-1].image}" alt="${pokeInfos[pokeInfos[i].evolutions[j]-1].name}">
+//                     <p>${pokeInfos[pokeInfos[i].evolutions[j]-1].name}</p>
+//                 </div>
+//             `;
+//         }
+//         document.querySelectorAll('.imgCont .back .evolutions')[i].innerHTML = evos;
+//         evosHtmlArr.push(evos);
+//         evos = "";
+//         pokeInfos[i].evolutionsAsHtml = evos;
+//     }
+// }
 
 function setCard(i) {
     return /* HTML */  `<div class="imgCont displayFlex shown" onclick="showInOverlay(${i})">
@@ -137,10 +125,10 @@ function setCard(i) {
     <div class="back displayFlex displayNone" style="transform: scaleX(-1);">
         <div class="diagramm"></div>
 
-        <div class="evolutions displayFlex">
+        <!-- <div class="evolutions displayFlex">
             <p class="evolvesTo">Evolves to:</p>
             ${pokeInfos[i].evolutionsAsHtml}
-        </div>
+        </div> -->
     </div>
 </div>`;
 }
@@ -165,10 +153,10 @@ function setCards(start=0) {
             <div class="back displayFlex displayNone" style="transform: scaleX(-1);">
                 <div class="diagramm"></div>
 
-                <div class="evolutions displayFlex">
+                <!-- <div class="evolutions displayFlex">
                     <p class="evolvesTo">Evolves to:</p>
                     ${pokeInfos[i].evolutionsAsHtml}
-                </div>
+                </div> -->
             </div>
         </div>`;
         document.querySelector('.allCards').innerHTML += card;
@@ -190,7 +178,7 @@ function loadingBar (i) {
     }
 }
 
-function loadingBarRemaining(i, diff) {
+function loadingBarMissing(i, diff) {
     loadingBarInner.style.width = `${100*(i+1)/diff}%`;
     if(i === diff-1) {
         document.querySelector('.loadingBar').classList.remove('displayFlex');
@@ -217,9 +205,9 @@ function showInOverlay(i) {
 }
 
 function checkSlideKeys(event, i) {
-    if(event.key === "left") {
+    if(event.key === "ArrowLeft") {
         checkSlidePerce(i, 'prev');
-    }else if(event.key === "right") {
+    }else if(event.key === "ArrowRight") {
         checkSlidePerce(i, 'next');
     }
 }
@@ -288,12 +276,12 @@ function setSlide(i) {
 
             <div class="separator"></div>
 
-            <div class="evolutions displayFlex">
+            <!-- <div class="evolutions displayFlex">
                 <p class="evolvesTo">Evolves to:</p>
                 <div class="evos displayFlex">
                     ${evosHtmlArr[i+1]}
                 </div>
-            </div>
+            </div> -->
         </div>
     </div>
 </div>`
@@ -409,6 +397,10 @@ function getBgc(type) {
             color = '#808080';
             break;
         }
+        case "fairy": {
+            color = 'pink';
+            break;
+        }
     }
     return color;
 }
@@ -468,58 +460,32 @@ function fromTo() {
     let from = +document.querySelector('#from').value === 0 ? 1 : +document.querySelector('#from').value;
     let to = +document.querySelector('#to').value === 0 ? lastIndex : +document.querySelector('#to').value;
     showAllPokemon();
-    if(from > to) {
-        return;
-    }
-    if(to > from && lastIndex < to) {
-        loadMissingPokemon(lastIndex, to);
-    }
     for(let i=0; i<from-1; i++)  {
         cards[i].classList.add('displayNone');
     }
     for(let j=to; j<lastIndex-1; j++) {
         cards[j].classList.add('displayNone');
     }
+    if(from > to) {
+        return;
+    }
 }
 
-async function loadMissingPokemon(indexFirstNew, to) {
+async function loadMissingPokemon() {
+    loadUpTo = +document.querySelector('#loadFurther').value;
+    document.querySelector('.skipLoading').classList.remove('displayNone');
+    if(loadUpTo <= lastIndex) { return; }
     document.querySelector('.loadingBar').classList.remove('displayNone');
-    for(let i=indexFirstNew; i<to; i++) {
-        data = await fetch(`https://pokeapi.co/api/v2/pokemon/${i}`);
+    for(let i=lastIndex; i<loadUpTo; i++) {
+        data = await fetch(`https://pokeapi.co/api/v2/pokemon/${i+1}`);
         data = await data.json();
-        pokeInfos.push({
-            type: data.types[0].type.name,
-            name: data.species.name,
-            image: data.sprites.front_default,
-            noice: data.cries.latest,
-            hp: data.stats[0].base_stat,
-            attack: data.stats[1].base_stat,
-            defense: data.stats[2].base_stat,
-            specialAttack: data.stats[3].base_stat,
-            specialDefense: data.stats[4].base_stat,
-            speed: data.stats[5].base_stat
-        });
-        let card = /* HTML */ `
-            <div class="imgCont displayFlex" onclick="showInOverlay(${i-1})">
-                <div class="name displayFlex" style="background-color: ${getBgc(pokeInfos[i-1].type)};">
-                    <p>#${i+1}: ${pokeInfos[i-1].name.charAt(0).toUpperCase() + pokeInfos[i-1].name.slice(1)}</p>
-                </div>
-                <img src="${pokeInfos[i-1].image}" alt="">
-                <p>Type: ${pokeInfos[i-1].type}</p>
-                <div class="playNoice displayFlex" onclick="startPlayer(event, '${pokeInfos[i-1].noice}')">
-                    <p>Noice: </p>
-                    <svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                        <polygon points="7,5 15,10 7,15" fill="white"/>
-                    </svg>
-                </div>
-            </div>
-        `;
-        document.querySelector('.allCards').innerHTML += card;
-        loadingBarRemaining(i-indexFirstNew, to-indexFirstNew);
+        pokeInfosPush(data, i);
+        document.querySelector('.allCards').innerHTML += setCard(i);
+        window.scrollTo(0, document.body.scrollHeight);
+        loadingBarMissing(i-lastIndex, loadUpTo-lastIndex);
     }
-    lastIndex = to;
-    //updateLocalstorage();
-    setCards(indexFirstNew);
+    document.querySelector('.skipLoading').classList.add('displayNone');
+    lastIndex = loadUpTo;
 }
 
 function updateLocalstorage() {
@@ -573,13 +539,13 @@ function loadSpecs(i) {
     loadSpeed(i);
 }
 
-function loadHp(i, perce=0) {
+async function loadHp(i, perce=0) {
     if(document.querySelectorAll('.allCards .imgCont')[i].classList.contains('specsShown')) {
         showSpecsImmediately(i);
         return;
     }
     perce++;
-    document.querySelector(`#hp${i} .bar .inner`).style.width = `${perce/150*pokeInfos[i].hp}%`;
+    document.querySelector(`#hp${i} .bar .inner`).style.width = `${perce*pokeInfos[i].hp/150}%`;
     document.querySelector(`#hp${i} .bar .inner`).innerHTML = `<p>${Math.ceil(perce/100*pokeInfos[i].hp)}</p>`;
     if(perce === 100) {
         document.querySelectorAll('.imgCont')[i].classList.add('specsShown');
@@ -671,24 +637,44 @@ function loadSpeed(i, perce=0) {
 }
 
 function showSpecsImmediately(i) {
-    document.querySelector(`#hp${i} .bar .inner`).style.height = `${pokeInfos[i].hp}%`;
+    document.querySelector(`#hp${i} .bar .inner`).style.width = `${pokeInfos[i].hp*2/3}%`;
     document.querySelector(`#hp${i} .bar .inner`).innerHTML = `<p>${pokeInfos[i].hp}</p>`;
-    document.querySelector(`#attack${i} .bar .inner`).style.height = `${pokeInfos[i].attack}%`;
+    document.querySelector(`#attack${i} .bar .inner`).style.width = `${pokeInfos[i].attack*2/3}%`;
     document.querySelector(`#attack${i} .bar .inner`).innerHTML = `<p>${pokeInfos[i].attack}</p>`;
-    document.querySelector(`#defense${i} .bar .inner`).style.height = `${pokeInfos[i].defense}%`;
+    document.querySelector(`#defense${i} .bar .inner`).style.width = `${pokeInfos[i].defense*2/3}%`;
     document.querySelector(`#defense${i} .bar .inner`).innerHTML = `<p>${pokeInfos[i].defense}</p>`;
-    document.querySelector(`#specialAttack${i} .bar .inner`).style.height = `${pokeInfos[i].specialAttack}%`;
+    document.querySelector(`#specialAttack${i} .bar .inner`).style.width = `${pokeInfos[i].specialAttack*2/3}%`;
     document.querySelector(`#specialAttack${i} .bar .inner`).innerHTML = `<p>${pokeInfos[i].specialAttack}</p>`;
-    document.querySelector(`#specialDefense${i} .bar .inner`).style.height = `${pokeInfos[i].specialDefense}%`;
+    document.querySelector(`#specialDefense${i} .bar .inner`).style.width = `${pokeInfos[i].specialDefense*2/3}%`;
     document.querySelector(`#specialDefense${i} .bar .inner`).innerHTML = `<p>${pokeInfos[i].specialDefense}</p>`;
-    document.querySelector(`#speed${i} .bar .inner`).style.height = `${pokeInfos[i].speed}%`;
+    document.querySelector(`#speed${i} .bar .inner`).style.width = `${pokeInfos[i].speed*2/3}%`;
     document.querySelector(`#speed${i} .bar .inner`).innerHTML = `<p>${pokeInfos[i].speed}</p>`;    
 }
 
 document.querySelector('body').addEventListener('keyup', (event)=>{
     event.stopPropagation();
-    console.log(5);
     if(event.key === 'Escape') {
         closeOverlay();
     }
 })
+
+function pokeInfosPush(data, i) {
+    pokeInfos.push({
+        type: data.types[0].type.name,
+        name: data.species.name,
+        image: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/${i}.png`,
+        noice: data.cries.latest,
+        hp: data.stats[0].base_stat,
+        attack: data.stats[1].base_stat,
+        defense: data.stats[2].base_stat,
+        specialAttack: data.stats[3].base_stat,
+        specialDefense: data.stats[4].base_stat,
+        speed: data.stats[5].base_stat
+    });
+}
+
+function skipLoading() {
+    loadUpTo = pokeInfos.length+1;
+    document.querySelector('.skipLoading').classList.add('displayNone');
+    document.querySelector('.loadingBar').classList.add('displayNone');
+}

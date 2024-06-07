@@ -9,6 +9,14 @@ p {
     margin: 0;
 }
 
+input {
+    height: 85%;
+}
+
+input::-webkit-inner-spin-button, input::-webkit-outer-spin-button {
+    display: none;
+}
+
 .displayFlex {
     display: flex;
 }
@@ -148,12 +156,6 @@ p {
     right: 5%;
 }
 
-@media only screen and (max-width: 500px) {
-    .arrow-prev, .arrow-next {
-        filter: invert(86%) sepia(11%) saturate(4583%) hue-rotate(7deg) brightness(92%) contrast(79%);
-    }
-}
-
 .overlay .closeOverlay {
     position: absolute;
     top: 4vw;
@@ -183,11 +185,18 @@ p {
     border-radius: 50px;
     box-sizing: border-box;
     font-size: 20px;
+    text-align: center;
+    padding-left: 0;
+    padding-right: 0;
 }
 
 #searchAttributes {
     width: 50%;
-    height: 85%;
+}
+
+#loadFurther {
+    min-width: 80px;
+    width: 15%;
 }
 
 .fromTo {
@@ -201,7 +210,6 @@ p {
 #from, #to {
     min-width: 80px;
     width: 20%;
-    height: 85%;
     padding-top: 0;
     padding-bottom: 0;
 }
@@ -282,6 +290,7 @@ p {
     column-gap: 10px;
     width: 75%;
     height: 15px;
+    position: relative;
 }
 
 .diagramm div .bar .inner {
@@ -303,9 +312,30 @@ p {
     font-size: 10px;
     color: #383E42;
     width: fit-content;
+    position: absolute;
+    top: 53%;
+    left: 5%;
+    transform: translate(0%, -50%);
+    color: white;
+    margin: 0;
 }
 
 .evolvesTo {
     font-size: 14px;
     text-align: center;
+}
+
+.skipLoading {
+    align-items: center;
+    justify-content: center;
+}
+
+@media only screen and (max-width: 500px) {
+    body {
+        padding-bottom: 50px;
+    }
+
+    .arrow-prev, .arrow-next {
+        filter: invert(86%) sepia(11%) saturate(4583%) hue-rotate(7deg) brightness(92%) contrast(79%);
+    }
 }

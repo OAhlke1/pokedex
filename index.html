@@ -17,12 +17,16 @@
             <input class="displayFlex" type="number" placeholder="from" min="1" id="from" onkeyup="fromTo()">
             <input class="displayFlex" type="number" placeholder="to" id="to" onkeyup="fromTo()">
         </div>
+        <div class="further displayFlex">
+            <input type="number" id="loadFurther" placeholder="more" onchange="loadMissingPokemon()">
+            <button class="skipLoading displayFlex displayNone" onclick="skipLoading()">skip loading</button>
+        </div>
         <input type="text" id="searchAttributes" placeholder="search" onkeyup="setKeywords(event)">
     </div>
 
     <div class="allCards displayFlex"></div>
 
-    <audio class="displayNone" volume="0.5" src=""></audio>
+    <audio class="displayNone" volume="0.25" src=""></audio>
 
     <div class="overlay displayFlex displayNone"></div>
 </body>
