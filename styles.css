@@ -2,7 +2,9 @@ body {
     font-family: sans-serif, Arial, Helvetica, sans-serif;
     margin: 0;
     background-color: white;
-    padding: 10px 0px 5vw 0px;
+    padding: 10px 0px 100px 0px;
+    max-width: 800px;
+    margin: 0px auto;
 }
 
 p {
@@ -10,6 +12,7 @@ p {
 }
 
 input {
+    width: 80% !important;
     height: 85%;
 }
 
@@ -99,11 +102,14 @@ input::-webkit-inner-spin-button, input::-webkit-outer-spin-button {
     align-items: center;
     justify-content: center;
     width: 100vw;
+    max-width: 800px;
     height: 100vh;
     position: fixed;
     top: 0;
-    left: 0;
-    background-color: transparent;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: white;
+    z-index: 5000;
 }
 
 .overlay .overlaySlider {
@@ -169,14 +175,49 @@ input::-webkit-inner-spin-button, input::-webkit-outer-spin-button {
 
 .searchBar {
     align-items: center;
-    justify-content: center;
+    justify-content: space-evenly;
     position: fixed;
     bottom: 0;
-    left: 0;
+    left: 50%;
     width: 100vw;
-    height: 5vh;
+    max-width: 800px;
+    height: fit-content;
     background-color: red;
     z-index: 50;
+    padding: 10px 0px;
+    transform: translate(-50%);
+}
+
+.searchBar div {
+    justify-content: center;
+    position: relative;
+}
+
+.searchBar .infos {
+    display: none;
+    align-items: center;
+    position: absolute;
+    left: 50%;
+    top: 0;
+    transform: translate(-50%, -110%);
+    background-color: beige;
+    border: 1px solid black;
+    color: black;
+    padding: 5px;
+    border-radius: 5px;
+    width: fit-content;
+    column-gap: 10px;
+}
+
+.searchBar .infos p {
+    text-align: center;
+    white-space: nowrap;
+}
+
+.searchBar .infos button {
+    height: fit-content;
+    padding: 10px;
+    background-color: orange;
 }
 
 .searchBar input {
@@ -190,21 +231,34 @@ input::-webkit-inner-spin-button, input::-webkit-outer-spin-button {
     padding-right: 0;
 }
 
+.searchBar div {
+    width: fit-content !important;
+}
+
 #searchAttributes {
-    width: 50%;
+    position: relative;
+    width: 80%;
 }
 
 #loadFurther {
     min-width: 80px;
     width: 15%;
+    height: 100%;
+}
+
+.further {
+    justify-content: center;
+    width: fit-content;
+    height: 85%;
 }
 
 .fromTo {
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     width: fit-content;
     height: 100%;
-    column-gap: 10px;
+    row-gap: 10px;
 }
 
 #from, #to {
@@ -330,9 +384,38 @@ input::-webkit-inner-spin-button, input::-webkit-outer-spin-button {
     justify-content: center;
 }
 
+.evoCont {
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 25%;
+}
+
+.evoCont .evolution {
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    width: calc(100% - 20px);
+    height: 100%;
+}
+
+.evoCont .evolution p {
+    font-size: 10px;
+}
+
+.evoCont .evolution p:first-child {
+    font-size: 8px;
+}
+
+.evoCont .evolution img {
+    width: 80%;
+    height: auto;
+    max-height: 30px;
+}
+
 @media only screen and (max-width: 500px) {
     body {
-        padding-bottom: 50px;
+        padding-bottom: 100px;
     }
 
     .arrow-prev, .arrow-next {

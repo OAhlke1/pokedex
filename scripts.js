@@ -3,7 +3,6 @@ let loadingBarInner = document.querySelector('.loadingBar .inner');
 let lastIndex = 151;
 let overlayInner;
 let overlay = document.querySelector('.overlay');
-let data, data2;
 let allCards = [];
 let pokeInfos = [];
 let keys = [];
@@ -11,7 +10,7 @@ let rotateVal = 1.44;
 let scaleFactorX = 1.5;
 let rotateAbleCard;
 let evoData;
-let evoChain;
+let evoChain = [];
 let pokeCount = 0;
 let pokeCountArrays = [];
 let evoChainIndexes = [];
@@ -19,6 +18,8 @@ let evosHtmlArr = [];
 let name = "";
 let slidePerce = 0;
 let loadUpTo = 0;
+let chainObj, evoObj1, evoObj2;
+let index1, index2, index3;
 
 let cK = function checkKeywords(words, i) {
     let name = pokeInfos[i].name;
@@ -32,15 +33,20 @@ async function loadPokemon () {
         lastIndex = pokeInfos.length;
         setCards();
     }else {
+        document.querySelector('.loadingBar').classList.remove('displayNone');
         for(let i=1; i<lastIndex+1; i++) {
             data = await fetch(`https://pokeapi.co/api/v2/pokemon/${i}`);
             data = await data.json();
-            data2 = await fetch(`https://pokeapi.co/api/v2/evolution-chain/${i}`);
-            data2 = await data2.json();
-            pokeInfosPush(data, i);
-            document.querySelector('.allCards').innerHTML += setCard(i-1);
-            loadingBar(i);
+            let pushObj = await pokeInfosPush(data, i).then(async (val)=>{
+                val.evolutions = await new Promise((resolve, reject)=>{
+                    resolve(getEvolutions(i));
+                })
+                return val;
+            })
+            pokeInfos.push(pushObj);
+            document.querySelector('.allCards').innerHTML += setNewCard(i);
             window.scrollTo(0, document.body.scrollHeight);
+            loadingBar(i);
         }
     }
     for(let i=1; i<lastIndex+1; i++) {
@@ -48,7 +54,6 @@ async function loadPokemon () {
             localStorage.setItem('pokeData', JSON.stringify(pokeInfos));
         };
     }
-    loadEvolutions();
 }
 
 async function loadEvolutions() {
@@ -72,50 +77,15 @@ function checkForProperty(elem) {
     }
 }
 
-// function pushEvosToPokeInfos() {
-//     for(let i=0; i<pokeCountArrays.length; i++) {
-//         for(let j=0; j<pokeCountArrays[i].length; j++) {
-//             if(pokeCountArrays[i][j] === lastIndex+1) {
-//                 setEvolutions();
-//                 return;
-//             }else {
-//                 pokeInfos[pokeCountArrays[i][j]-1].evolutions = pokeCountArrays[i];
-//             }
-//         }
-//     }
-//     updateLocalstorage();
-// }
-
-// function setEvolutions() {
-//     let evos = "";
-//     for(let i=0; i<pokeInfos.length; i++) {
-//         if(i === pokeInfos.length-1) {
-//             break;
-//         }
-//         for(let j=0; j<pokeInfos[i].evolutions.length; j++) {
-//             evos += /* HTML */ `
-//                 <div class="evo">
-//                     <img src="${pokeInfos[pokeInfos[i].evolutions[j]-1].image}" alt="${pokeInfos[pokeInfos[i].evolutions[j]-1].name}">
-//                     <p>${pokeInfos[pokeInfos[i].evolutions[j]-1].name}</p>
-//                 </div>
-//             `;
-//         }
-//         document.querySelectorAll('.imgCont .back .evolutions')[i].innerHTML = evos;
-//         evosHtmlArr.push(evos);
-//         evos = "";
-//         pokeInfos[i].evolutionsAsHtml = evos;
-//     }
-// }
-
 function setCard(i) {
     return /* HTML */  `<div class="imgCont displayFlex shown" onclick="showInOverlay(${i})">
     <div class="front displayFlex">
-        <div class="name displayFlex" style="background-color: ${getBgc(pokeInfos[i].type)};">
-            <p>#${i+1}: ${pokeInfos[i].name.charAt(0).toUpperCase() + pokeInfos[i].name.slice(1)}</p>
+        <div class="name displayFlex" style="background-color: ${getBgc(pokeInfos[i-1].type)};">
+            <p>#${i}: ${pokeInfos[i-1].name.charAt(0).toUpperCase() + pokeInfos[i-1].name.slice(1)}</p>
         </div>
-        <img src="${pokeInfos[i].image}" alt="">
-        <p>Type: ${pokeInfos[i].type}</p>
-        <div class="playNoice displayFlex" onclick="startPlayer(event, '${pokeInfos[i].noice}')">
+        <img src="${pokeInfos[i-1].image}" alt="">
+        <p>Type: ${pokeInfos[i-1].type}</p>
+        <div class="playNoice displayFlex" onclick="startPlayer(event, '${pokeInfos[i-1].noice}')">
             <p>Noice: </p>
             <svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                 <polygon points="7,5 15,10 7,15" fill="white"/>
@@ -124,11 +94,6 @@ function setCard(i) {
     </div>
     <div class="back displayFlex displayNone" style="transform: scaleX(-1);">
         <div class="diagramm"></div>
-
-        <!-- <div class="evolutions displayFlex">
-            <p class="evolvesTo">Evolves to:</p>
-            ${pokeInfos[i].evolutionsAsHtml}
-        </div> -->
     </div>
 </div>`;
 }
@@ -152,11 +117,6 @@ function setCards(start=0) {
             </div>
             <div class="back displayFlex displayNone" style="transform: scaleX(-1);">
                 <div class="diagramm"></div>
-
-                <!-- <div class="evolutions displayFlex">
-                    <p class="evolvesTo">Evolves to:</p>
-                    ${pokeInfos[i].evolutionsAsHtml}
-                </div> -->
             </div>
         </div>`;
         document.querySelector('.allCards').innerHTML += card;
@@ -180,7 +140,7 @@ function loadingBar (i) {
 
 function loadingBarMissing(i, diff) {
     loadingBarInner.style.width = `${100*(i+1)/diff}%`;
-    if(i === diff-1) {
+    if(i >= diff-1) {
         document.querySelector('.loadingBar').classList.remove('displayFlex');
         document.querySelector('.loadingBar').classList.add('displayNone');
     }
@@ -233,58 +193,62 @@ function setSlide(i) {
     i--;
     return /* HTML */`<div class="slideCont displayFlex">
     <div class="imgCont displayFlex shown" onclick="checkRotateVal(event, ${i+1})">
-        <div class="front displayFlex">
-            <div class="name displayFlex" style="background-color: ${getBgc(pokeInfos[i+1].type)};">
-                <p>#${i+2}: ${pokeInfos[i+1].name.charAt(0).toUpperCase() + pokeInfos[i+1].name.slice(1)}</p>
-            </div>
-            <img src="${pokeInfos[i+1].image}" alt="">
-            <p>Type: ${pokeInfos[i+1].type}</p>
-            <div class="playNoice displayFlex" onclick="startPlayer(event, '${pokeInfos[i+1].noice}')">
-                <p>Noice: </p>
-                <svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                    <polygon points="7,5 15,10 7,15" fill="white"/>
-                </svg>
-            </div>
-        </div>
+        ${setSlideCardFront(i)}
         <div class="back displayFlex displayNone" style="transform: scaleX(-1);">
-            <div class="diagramm displayFlex">
-                <div class="hp" id="hp${i+1}">
-                    <p>HP</p>
-                <div class="bar"><div class="inner"></div></div>
-                </div>
-                <div class="attack" id="attack${i+1}">
-                    <p>Attack</p>
-                    <div class="bar"><div class="inner"></div></div>
-                </div>
-                <div class="defense" id="defense${i+1}">
-                    <p>Defense</p>
-                    <div class="bar"><div class="inner"></div></div>
-                </div>
-                <div class="specialAttack" id="specialAttack${i+1}">
-                    <p>Sp.-Attack</p>
-                    <div class="bar"><div class="inner"></div></div>
-                </div>
-                <div class="specialDefense" id="specialDefense${i+1}">
-                    <p>Sp.-Def.</p>
-                    <div class="bar"><div class="inner"></div></div>
-                </div>
-                <div class="speed" id="speed${i+1}">
-                    <p>Speed</p>
-                    <div class="bar"><div class="inner"></div></div>
-                </div>
-            </div>
+            ${getSpecsHtml(i)}
 
             <div class="separator"></div>
-
-            <!-- <div class="evolutions displayFlex">
-                <p class="evolvesTo">Evolves to:</p>
-                <div class="evos displayFlex">
-                    ${evosHtmlArr[i+1]}
-                </div>
-            </div> -->
+            <div class="evoCont displayFlex">
+                ${pokeInfos[i+1].evolutions}
+            </div>
         </div>
     </div>
 </div>`
+}
+
+function setSlideCardFront(i) {
+    return `<div class="front displayFlex">
+        <div class="name displayFlex" style="background-color: ${getBgc(pokeInfos[i+1].type)};">
+            <p>#${i+2}: ${pokeInfos[i+1].name.charAt(0).toUpperCase() + pokeInfos[i+1].name.slice(1)}</p>
+        </div>
+        <img src="${pokeInfos[i+1].image}" alt="">
+        <p>Type: ${pokeInfos[i+1].type}</p>
+        <div class="playNoice displayFlex" onclick="startPlayer(event, '${pokeInfos[i+1].noice}')">
+            <p>Noice: </p>
+            <svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                <polygon points="7,5 15,10 7,15" fill="white"/>
+            </svg>
+        </div>
+    </div>`;
+}
+
+function getSpecsHtml(i) {
+    return `<div class="diagramm displayFlex">
+        <div class="hp" id="hp${i+1}">
+            <p>HP</p>
+        <div class="bar"><div class="inner"></div></div>
+        </div>
+        <div class="attack" id="attack${i+1}">
+            <p>Attack</p>
+            <div class="bar"><div class="inner"></div></div>
+        </div>
+        <div class="defense" id="defense${i+1}">
+            <p>Defense</p>
+            <div class="bar"><div class="inner"></div></div>
+        </div>
+        <div class="specialAttack" id="specialAttack${i+1}">
+            <p>Sp.-Attack</p>
+            <div class="bar"><div class="inner"></div></div>
+        </div>
+        <div class="specialDefense" id="specialDefense${i+1}">
+            <p>Sp.-Def.</p>
+            <div class="bar"><div class="inner"></div></div>
+        </div>
+        <div class="speed" id="speed${i+1}">
+            <p>Speed</p>
+            <div class="bar"><div class="inner"></div></div>
+        </div>
+    </div>`;
 }
 
 function checkSlidePerce(i, prevNext) {
@@ -456,36 +420,86 @@ function searchCards() {
 }
 
 function fromTo() {
+    document.querySelector('#searchAttributes').value = "";
+    document.querySelector('#loadFurther').value = "";
     let cards = document.querySelectorAll('.imgCont');
     let from = +document.querySelector('#from').value === 0 ? 1 : +document.querySelector('#from').value;
     let to = +document.querySelector('#to').value === 0 ? lastIndex : +document.querySelector('#to').value;
     showAllPokemon();
+    if(from > to) {
+        return;
+    }
     for(let i=0; i<from-1; i++)  {
         cards[i].classList.add('displayNone');
     }
-    for(let j=to; j<lastIndex-1; j++) {
+    for(let j=to; j<lastIndex; j++) {
         cards[j].classList.add('displayNone');
-    }
-    if(from > to) {
-        return;
     }
 }
 
 async function loadMissingPokemon() {
+    document.querySelector('#from').value = "";
+    document.querySelector('#to').value = "";
     loadUpTo = +document.querySelector('#loadFurther').value;
     document.querySelector('.skipLoading').classList.remove('displayNone');
     if(loadUpTo <= lastIndex) { return; }
     document.querySelector('.loadingBar').classList.remove('displayNone');
-    for(let i=lastIndex; i<loadUpTo; i++) {
-        data = await fetch(`https://pokeapi.co/api/v2/pokemon/${i+1}`);
+    for(let i=lastIndex+1; i<loadUpTo+1; i++) {
+        data = await fetch(`https://pokeapi.co/api/v2/pokemon/${i}`);
         data = await data.json();
-        pokeInfosPush(data, i);
-        document.querySelector('.allCards').innerHTML += setCard(i);
+        let pushObj = await pokeInfosPush(data, i).then(async (val)=>{
+            val.evolutions = await new Promise((resolve, reject)=>{
+                resolve(getEvolutions(i));
+            })
+            return val;
+        })
+        pokeInfos.push(pushObj);
+        document.querySelector('.allCards').innerHTML += setNewCard(i);
         window.scrollTo(0, document.body.scrollHeight);
         loadingBarMissing(i-lastIndex, loadUpTo-lastIndex);
     }
     document.querySelector('.skipLoading').classList.add('displayNone');
     lastIndex = loadUpTo;
+}
+
+function pokeInfosPush(data, i) {
+    return new Promise((resolve, reject) => {
+        let obj = {
+            type: data.types[0].type.name,
+            name: data.species.name,
+            image: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/${i}.png`,
+            noice: data.cries.latest,
+            hp: data.stats[0].base_stat,
+            attack: data.stats[1].base_stat,
+            defense: data.stats[2].base_stat,
+            specialAttack: data.stats[3].base_stat,
+            specialDefense: data.stats[4].base_stat,
+            speed: data.stats[5].base_stat,
+            evolutions: ''
+        }
+        resolve(obj);
+    })
+}
+
+function setNewCard(i) {
+    return /* HTML */  `<div class="imgCont displayFlex shown" onclick="showInOverlay(${i-1})">
+    <div class="front displayFlex">
+        <div class="name displayFlex" style="background-color: ${getBgc(pokeInfos[i-1].type)};">
+            <p>#${i}: ${pokeInfos[i-1].name.charAt(0).toUpperCase() + pokeInfos[i-1].name.slice(1)}</p>
+        </div>
+        <img src="${pokeInfos[i-1].image}" alt="">
+        <p>Type: ${pokeInfos[i-1].type}</p>
+        <div class="playNoice displayFlex" onclick="startPlayer(event, '${pokeInfos[i-1].noice}')">
+            <p>Noice: </p>
+            <svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                <polygon points="7,5 15,10 7,15" fill="white"/>
+            </svg>
+        </div>
+    </div>
+    <div class="back displayFlex displayNone" style="transform: scaleX(-1);">
+        <div class="diagramm"></div>
+    </div>
+</div>`;
 }
 
 function updateLocalstorage() {
@@ -658,23 +672,108 @@ document.querySelector('body').addEventListener('keyup', (event)=>{
     }
 })
 
-function pokeInfosPush(data, i) {
-    pokeInfos.push({
-        type: data.types[0].type.name,
-        name: data.species.name,
-        image: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/${i}.png`,
-        noice: data.cries.latest,
-        hp: data.stats[0].base_stat,
-        attack: data.stats[1].base_stat,
-        defense: data.stats[2].base_stat,
-        specialAttack: data.stats[3].base_stat,
-        specialDefense: data.stats[4].base_stat,
-        speed: data.stats[5].base_stat
-    });
-}
-
 function skipLoading() {
     loadUpTo = pokeInfos.length+1;
     document.querySelector('.skipLoading').classList.add('displayNone');
     document.querySelector('.loadingBar').classList.add('displayNone');
+}
+
+async function getEvolutions(i=1) {
+    evoHtml = ``;
+    let obj = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${i}`);
+    obj = await obj.json();
+    let chainObj = await fetch(obj.evolution_chain.url);
+    chainObj = await chainObj.json();
+    index1 = await getEvoIndex(`https://pokeapi.co/api/v2/pokemon/${chainObj.chain.species.name}`);
+    evoHtml = getFirstEvolution(chainObj.chain, index1);
+    if(chainObj.chain.evolves_to.length > 0) {
+        let evoObj1 = chainObj.chain.evolves_to[0];
+        let index2 = await getEvoIndex(`https://pokeapi.co/api/v2/pokemon/${evoObj1.species.name}`);
+        evoHtml = getSecondEvolution(chainObj.chain, evoObj1, index1, index2);
+        if(evoObj1.evolves_to.length > 0) {
+            let evoObj2 = evoObj1.evolves_to[0];
+            let index3 = await getEvoIndex(`https://pokeapi.co/api/v2/pokemon/${evoObj2.species.name}`);
+            evoHtml = getThirdEvolution(chainObj.chain, evoObj1, evoObj2, index1, index2, index3);
+        }
+    }
+    return evoHtml;
+}
+
+function getEvoIndex (url) {
+    return new Promise(async (resolve, reject) => {
+        let index = await fetch(url);
+        index = await index.json();
+        resolve(parseInt((index.species.url).slice(42)));
+    })
+}
+
+function getFirstEvolution(obj0, index1) {
+    return `<div class="evolution displayFlex">
+        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/dream-world/${index1}.svg" alt="">
+            <p>#${index1}</p>
+        <p>${obj0.species.name.charAt(0).toUpperCase() + obj0.species.name.slice(1)}</p>
+    </div>`;
+}
+
+function getSecondEvolution(obj0, evoObj1, index1, index2) {
+    return `<div class="evolution displayFlex">
+        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/dream-world/${index1}.svg" alt="">
+            <p>#${index1}</p>
+        <p>${obj0.species.name.charAt(0).toUpperCase() + obj0.species.name.slice(1)}</p>
+    </div>
+    <div class="evolution displayFlex">
+        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/dream-world/${index2}.svg" alt="">
+            <p>#${index2}</p>
+        <p>${evoObj1.species.name.charAt(0).toUpperCase() + evoObj1.species.name.slice(1)}</p>
+    </div>`;
+}
+
+function getThirdEvolution(obj0, evoObj1, evoObj2, index1, index2, index3) {
+    return `<div class="evolution displayFlex">
+        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/dream-world/${index1}.svg" alt="">
+        <p>#${index1}</p>
+        <p>${obj0.species.name.charAt(0).toUpperCase() + obj0.species.name.slice(1)}</p>
+    </div>
+    <div class="evolution displayFlex">
+        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/dream-world/${index2}.svg" alt="">
+        <p>#${index2}</p>
+        <p>${evoObj1.species.name.charAt(0).toUpperCase() + evoObj1.species.name.slice(1)}</p>
+    </div>
+    <div class="evolution displayFlex">
+        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/dream-world/${index3}.svg" alt="">
+        <p>#${index3}</p>
+        <p>${evoObj2.species.name.charAt(0).toUpperCase() + evoObj2.species.name.slice(1)}</p>
+    </div>`;
+}
+
+async function getEvochain(url) {
+    let obj = await fetch(url);
+    obj = await obj.json();
+    if(obj.chain.hasOwnProperty('evolves_to')) {
+        setEvolution1(obj)
+    }
+}
+
+function showFromToInfos() {
+    document.querySelector('.fromTo .infos').style.display = "flex";
+}
+
+function hideFromToInfos() {
+    document.querySelector('.fromTo .infos').classList.add('displayNone');
+}
+
+function showMoreInfos() {
+    document.querySelector('.further .infos').style.display = "flex";
+}
+
+function hideMoreInfos() {
+    document.querySelector('.further .infos').classList.add('displayNone');
+}
+
+function showSearchInfos() {
+    document.querySelector('.searchAttributes .infos').style.display = "flex";
+}
+
+function hideSearchInfos() {
+    document.querySelector('.searchAttributes .infos').classList.add('displayNone');
 }

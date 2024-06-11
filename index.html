@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pokedex</title>
     <link rel="stylesheet" href="./styles.css">
-    <link rel="icon" type="image/x-icon" href="./smettbo.ico" width="32" height="32">
+    <link rel="icon" type="image/x-icon" href="./smettbo.ico" width="64" height="64">
 </head>
 <body onload="loadPokemon()">
     <div class="loadingBar">
@@ -14,14 +14,37 @@
 
     <div class="searchBar displayFlex">
         <div class="fromTo displayFlex">
-            <input class="displayFlex" type="number" placeholder="from" min="1" id="from" onkeyup="fromTo()">
-            <input class="displayFlex" type="number" placeholder="to" id="to" onkeyup="fromTo()">
+            <div class="infos displayFlex">
+                <p id="fromToInfos">
+                    Give a range of Pokemon, you want to see.
+                    <br>If the upper bound greater than the amount
+                    <br>of pokemon, the last pokemon shown is the
+                    <br>of the list.
+                </p>
+                <button onclick="hideFromToInfos()">X</button>
+            </div>
+            <input class="displayFlex" type="number" placeholder="from" min="1" id="from" onkeyup="fromTo()" onfocus="showFromToInfos()">
+            <input class="displayFlex" type="number" placeholder="to" id="to" onkeyup="fromTo()" onclick="fromToInfos()">
         </div>
         <div class="further displayFlex">
-            <input type="number" id="loadFurther" placeholder="more" onchange="loadMissingPokemon()">
+            <div class="infos displayFlex">
+                <p id="furtherInfos">
+                    Give the index of that pokemon
+                    <br>up to which you want to extend
+                    <br>your list
+                </p>
+                <button class="closeInfo" onclick="hideMoreInfos()">X</button>
+            </div>
+            <input type="number" id="loadFurther" placeholder="more" onchange="loadMissingPokemon()" onfocus="showMoreInfos()">
             <button class="skipLoading displayFlex displayNone" onclick="skipLoading()">skip loading</button>
         </div>
-        <input type="text" id="searchAttributes" placeholder="search" onkeyup="setKeywords(event)">
+        <div class="searchAttributes displayFlex">
+            <div class="infos displayFlex">
+                <p id="searchInfos">Search for names and types</p>
+                <button class="closeInfo" onclick="hideSearchInfos()">X</button>
+            </div>
+            <input type="text" id="searchAttributes" placeholder="search" onchange="setKeywords(event)" onfocus="showSearchInfos()">
+        </div>
     </div>
 
     <div class="allCards displayFlex"></div>
@@ -29,6 +52,10 @@
     <audio class="displayNone" volume="0.25" src=""></audio>
 
     <div class="overlay displayFlex displayNone"></div>
+
+    <div id="evolutionContent displayFlex">
+        <div id="evolution"></div>
+    </div>
 </body>
 <script src="./scripts.js"></script>
 </html>
